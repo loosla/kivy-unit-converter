@@ -10,7 +10,6 @@ import math
 
 
 class TextArea(TextInput):
-
     input_filter = "float"
     multiline = False
     padding_x = TextInput().width / 2
@@ -21,34 +20,34 @@ class TextArea(TextInput):
 
 class UnitConverterApp(App):
     def build(self):
-        main_layout = BoxLayout(orientation = "vertical")
+        main_layout = BoxLayout(orientation="vertical")
 
         title_layout = BoxLayout(orientation="horizontal")
         title_layout.add_widget(Label())
-        title_layout.add_widget(Label(text='KG'))
-        title_layout.add_widget(Label(text='LB'))
+        title_layout.add_widget(Label(text="KG"))
+        title_layout.add_widget(Label(text="LB"))
 
         weight_layout = BoxLayout(orientation="horizontal")
-        weight_layout.add_widget(Label(text='Weight: '))
+        weight_layout.add_widget(Label(text="Weight: "))
         self.weight_kg = TextArea()
         self.weight_lb = TextArea()
         weight_layout.add_widget(self.weight_kg)
         weight_layout.add_widget(self.weight_lb)
 
         price_layout = BoxLayout(orientation="horizontal")
-        price_layout.add_widget(Label(text='Price: '))
+        price_layout.add_widget(Label(text="Price: "))
         self.price_kg = TextArea()
         self.price_lb = TextArea()
         price_layout.add_widget(self.price_kg)
         price_layout.add_widget(self.price_lb)
 
         calculate_layout = BoxLayout(orientation="horizontal")
-        button = Button(text="Get Cost", pos_hint={"center_x": 0.5, "center_y": 0.5},)
+        button = Button(text="Get Cost", pos_hint={"center_x": 0.5, "center_y": 0.5})
         button.bind(on_press=self.get_cost)
         calculate_layout.add_widget(button)
 
         cost_layout = BoxLayout(orientation="horizontal")
-        cost_layout.add_widget(Label(text='Total Cost: '))
+        cost_layout.add_widget(Label(text="Total Cost: "))
         self.cost = Label()
         cost_layout.add_widget(self.cost)
 
@@ -64,26 +63,38 @@ class UnitConverterApp(App):
         return main_layout
 
     def get_cost(self, btn):
-        if (self.weight_kg.text or self.weight_lb.text) and \
-                (self.price_kg.text or self.price_lb.text):
-            weight_kg = float(self.weight_kg.text) if self.weight_kg.text else float(self.weight_lb.text) * 2.20462262
-            price_kg = float(self.price_kg.text) if self.price_kg.text else float(self.price_lb.text) * 2.20462262
-            total_price = weight_kg * price_kg
-            self.cost.text = "$" + str(self.round_up(total_price, 2))
+        if not ((self.weight_kg.text or self.weight_lb.text) and \
+                (self.price_kg.text or self.price_lb.text)):
+            self.show_warning_popup("Weight and Price Should Have a Value!")
+        if (self.weight_kg.text and self.weight_lb.text) or \
+                (self.price_kg.text and self.price_lb.text):
+            self.show_warning_popup("Weight and Price Should Have a Only One Value!")
         else:
-            message_layout = BoxLayout(orientation="vertical")
-            message_layout.add_widget(Label(text='Weight and Price Should Have a Value!'))
-            close_popup = Button(text='OK')
-            message_layout.add_widget(close_popup)
-            popup = Popup(title='TRY AGAIN', content=message_layout,
-                          auto_dismiss=False)
-            close_popup.bind(on_press=popup.dismiss)
-            popup.open()
+            weight_kg = float(self.weight_kg.text) if self.weight_kg.text else lb_to_kg(float(self.weight_lb.text))
+            price_kg = float(self.price_kg.text) if self.price_kg.text else lb_to_kg(float(self.price_lb.text))
+            total_price = weight_kg * price_kg
+            self.cost.text = "$" + str(round_up(total_price, 2))
 
-    def round_up(self, n, decimals=0):
-        multiplier = 10 ** decimals
-        return math.ceil(n * multiplier) / multiplier
+    def show_warning_popup(self, text):
+        message_layout = BoxLayout(orientation="vertical")
+        message_layout.add_widget(Label(text=text))
+        close_popup = Button(text="OK")
+        message_layout.add_widget(close_popup)
+        popup = Popup(title="TRY AGAIN", content=message_layout,
+                      auto_dismiss=False)
+        close_popup.bind(on_press=popup.dismiss)
+        popup.open()
 
-if __name__ == '__main__':
+
+def round_up(self, n, decimals=0):
+    multiplier = 10 ** decimals
+    return math.ceil(n * multiplier) / multiplier
+
+def lb_to_kg(self, value):
+    if value.isnumeric():
+        return value * 2.20462262
+    return 0
+
+if __name__ == "__main__":
     UnitConverterApp().run()
 
